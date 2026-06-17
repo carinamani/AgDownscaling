@@ -10,7 +10,7 @@ class RunConfig:
     dataset:             str
     fold_assignments:    str       
     model_type:          ModelType = "rf"
-    spatial_block_col:   str       = "country"
+    spatial_block_col:   str       = "country_ID"
     id_cols:             list      = field(default_factory=list)
     n_inner_folds:       int       = 3
     n_iter_search:       int       = 25

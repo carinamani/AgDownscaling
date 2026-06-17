@@ -7,7 +7,7 @@ from pathlib import Path
 def load_fold_assignments(fold_csv_path: str) -> pd.DataFrame:
     """
     Load fold assignment CSV. Expects columns:
-      - country_code (or similar identifier)
+      - country_ID (or similar identifier)
       - fold_1, fold_2, ... (binary 0/1)
     """
     folds = pd.read_csv(fold_csv_path)
@@ -33,7 +33,7 @@ def make_spatial_folds(df: pd.DataFrame, config) -> list[dict]:
     folds_df, fold_cols = load_fold_assignments(config.fold_assignments)
 
     # only keep rows whose country appears in the fold CSV
-    valid_countries = set(folds_df["country_code"])
+    valid_countries = set(folds_df["country_ID"])
     df_filtered = df[df[config.spatial_block_col].isin(valid_countries)]
 
     n_dropped = len(df) - len(df_filtered)
@@ -42,8 +42,8 @@ def make_spatial_folds(df: pd.DataFrame, config) -> list[dict]:
 
     splits = []
     for fold in fold_cols:
-        test_countries  = folds_df.loc[folds_df[fold] == 1, "country_code"].tolist()
-        train_countries = folds_df.loc[folds_df[fold] == 0, "country_code"].tolist()
+        test_countries  = folds_df.loc[folds_df[fold] == 1, "country_ID"].tolist()
+        train_countries = folds_df.loc[folds_df[fold] == 0, "country_ID"].tolist()
 
         test_idx  = df_filtered[df_filtered[config.spatial_block_col].isin(test_countries)].index
         train_idx = df_filtered[df_filtered[config.spatial_block_col].isin(train_countries)].index
