@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, GroupKFold
 from quantile_forest import RandomForestQuantileRegressor
-from config import RunConfig
+from step_a_config import RunConfig
 
 
 def get_model(config: RunConfig):

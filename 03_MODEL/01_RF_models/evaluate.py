@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import root_mean_squared_error, r2_score
-from config import RunConfig
+from step_a_config import RunConfig
 
 
 def compute_point_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:

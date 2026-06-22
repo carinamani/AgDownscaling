@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.inspection import permutation_importance
-from config import RunConfig
+from step_a_config import RunConfig
 
 
 def get_impurity_importance(model, feature_cols: list) -> pd.DataFrame:

@@ -1,16 +1,18 @@
+## Defines function to configure RF model run based on parameters set in main script
+
 from dataclasses import dataclass, field
 from typing import Literal
 
-ModelType = Literal["rf", "qrf"]
-
+# lays out all of the inputs needed for each model run (some are defined here as default values, while others
+# are set directly in the run script) and checks that they are the expected type (e.g. filepath should be a string)
+# each class is then callable by config.target (for example)
 @dataclass
 class RunConfig:
     run_name:            str
     target:              str
     dataset:             str
     fold_assignments:    str       
-    model_type:          ModelType = "rf"
-    spatial_block_col:   str       = "country_ID"
+    model_type:          str
     id_cols:             list      = field(default_factory=list)
     n_inner_folds:       int       = 3
     n_iter_search:       int       = 25
