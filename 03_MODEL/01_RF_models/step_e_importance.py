@@ -1,25 +1,22 @@
+# Defines functions to measure feature importance across models
+
 import numpy as np
 import pandas as pd
 from sklearn.inspection import permutation_importance
-from step_a_config import RunConfig
 
-
-def get_impurity_importance(model, feature_cols: list) -> pd.DataFrame:
-    """
-    Built-in RF feature importance (mean decrease in impurity).
-    Fast but biased toward high-cardinality features.
-    """
+# Function to get impurity importance score 
+# impurity importance = the more a feature is used in splits which reduce the impurity in nodes, the higher its importance
+# NB: this measure is biased towards features with high-cardiality (i.e. non-binary features that offer more ways for model to split the data)
+def get_impurity_importance(model, feature_cols):
     return pd.DataFrame({
         "feature":            feature_cols,
         "impurity_importance": model.feature_importances_,
     }).sort_values("impurity_importance", ascending=False)
 
-
-def get_permutation_importance(model, X_test, y_test, config: RunConfig, n_repeats: int = 10) -> pd.DataFrame:
-    """
-    Permutation importance on the test set.
-    Slower but unbiased and reflects out-of-sample performance.
-    """
+# Function to get permutation importance 
+# shuffle all of the values of each feature and see how model performance is impacted
+# the most its impacted, the higher the importance of that feature 
+def get_permutation_importance(model, X_test, y_test, config, n_repeats: int = 10):
     result = permutation_importance(
         model, X_test, y_test,
         n_repeats    = n_repeats,
@@ -33,12 +30,9 @@ def get_permutation_importance(model, X_test, y_test, config: RunConfig, n_repea
         "permutation_std":        result.importances_std,
     }).sort_values("permutation_importance", ascending=False)
 
-
-def get_feature_importance(results: dict, df: pd.DataFrame, config: RunConfig) -> pd.DataFrame:
-    """
-    Compute both importance types for each fold, then aggregate across folds.
-    Returns a single DataFrame with mean and std of each importance type per feature.
-    """
+# Function to run impurity and permutation importance for each fold
+# also gets aggregate stats across all folds
+def get_feature_importance(results, df, config):
     X = df[results["feature_cols"]]
     y = df[config.target]
 
@@ -47,11 +41,8 @@ def get_feature_importance(results: dict, df: pd.DataFrame, config: RunConfig) -
 
     for fold_result in results["fold_results"]:
         model    = fold_result["best_model"]
-        test_idx = df.index.isin(
-            results["predictions"]
-            .loc[results["predictions"]["fold"] == fold_result["fold"]]
-            .index
-        )
+        test_idx = fold_result["test_idx"]
+
         X_test = X.loc[test_idx]
         y_test = y.loc[test_idx]
 
@@ -68,6 +59,7 @@ def get_feature_importance(results: dict, df: pd.DataFrame, config: RunConfig) -
     impurity_df    = pd.concat(fold_impurity)
     permutation_df = pd.concat(fold_permutation)
 
+    # calculate aggregate metrics (mean and SD across all folds)
     impurity_agg = (
         impurity_df
         .groupby("feature")["impurity_importance"]

@@ -1,11 +1,11 @@
+# Defines functions to evalutate model performance on test data
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import root_mean_squared_error, r2_score
-from step_a_config import RunConfig
 
-
-def compute_point_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
-    """RMSE, MAE, R2 on log scale, plus RMSE on original scale."""
+# Function to calculate core metrics (RMSE, MAE, R2 on log scale, and RMSE on non-log scale)
+def compute_point_metrics(y_true, y_pred):
     residuals = y_true - y_pred
     return {
         "rmse":         root_mean_squared_error(y_true, y_pred),
@@ -16,14 +16,11 @@ def compute_point_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
         "med_abs_err":  np.median(np.abs(residuals)),
     }
 
-
-def compute_interval_metrics(y_true: np.ndarray, q_low: np.ndarray, q_high: np.ndarray, nominal_coverage: float) -> dict:
-    """
-    Coverage and width of prediction intervals for QRF.
-    - coverage: fraction of test points where true value falls within [q_low, q_high]
-    - mean_width: average interval width on log scale
-    - coverage_gap: how far coverage is from nominal (e.g. 0.8 for 10-90 interval)
-    """
+# Function to evaluate prediction intervals from QRF
+# coverage: fraction of test points where true value falls within [q_low, q_high]
+# mean_width: average interval width (on log scale)
+# coverage_gap: how far coverage is from nominal (10-90th percentile should correctly capture 80% of data)
+def compute_interval_metrics(y_true, q_low, q_high, nominal_coverage):
     covered    = (y_true >= q_low) & (y_true <= q_high)
     coverage   = covered.mean()
     mean_width = (q_high - q_low).mean()
@@ -35,8 +32,9 @@ def compute_interval_metrics(y_true: np.ndarray, q_low: np.ndarray, q_high: np.n
         "mean_width_orig":  (np.exp(q_high) - np.exp(q_low)).mean(),
     }
 
-
-def evaluate_fold(fold_result: dict, config: RunConfig) -> dict:
+# Function to evaluate the results of an individual fold from the spatial CV
+# runs functions from above based on if its RF or QRF
+def evaluate_fold(fold_result, config):
     preds  = fold_result["predictions"]
     y_true = preds[config.target].values
 
@@ -70,16 +68,13 @@ def evaluate_fold(fold_result: dict, config: RunConfig) -> dict:
 
     return metrics
 
-
-def evaluate(results: dict, config: RunConfig) -> pd.DataFrame:
-    """
-    Evaluate all folds and return a DataFrame with one row per fold
-    plus an overall row aggregated across all folds.
-    """
+# Function to run metrics actoss all folds and print into table
+# includes row which aggregates results across all folds
+def evaluate(results, config):
     fold_metrics = [evaluate_fold(f, config) for f in results["fold_results"]]
     metrics_df   = pd.DataFrame(fold_metrics)
 
-    # overall row: mean across folds
+    # overall row (mean across folds)
     overall      = metrics_df.drop(columns="fold").mean().to_dict()
     overall["fold"] = "overall"
     metrics_df   = pd.concat(

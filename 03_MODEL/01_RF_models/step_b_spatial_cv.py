@@ -1,5 +1,5 @@
-#### Generates the spatial block splitting logic
-# imports CSV where I manually define which country_code is in which test fold (with column per fold and 1 for in test fold - 20% of data)
+# Defines functions for setting up the spatial blocking for spatial CV
+# requires CSV where I manually define which country_ID is in which fold 
 
 import pandas as pd
 
