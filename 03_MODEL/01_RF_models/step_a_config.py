@@ -10,7 +10,6 @@ from typing import Literal
 class RunConfig:
     run_name:            str
     target:              str
-    non_target:          str
     dataset:             str
     fold_assignments:    str       
     model_type:          str
