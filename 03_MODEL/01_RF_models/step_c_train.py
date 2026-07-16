@@ -4,6 +4,8 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
 from quantile_forest import RandomForestQuantileRegressor
+import xgboost as xgb
+import lightgbm as lgb
 
 # Function to initialize the model based on model type defined in run script
 # n_jobs = -1 means all available CPU cores are to be used for training the model
@@ -12,9 +14,13 @@ def get_model(config):
         return RandomForestRegressor(random_state=config.random_seed, n_jobs=-1)
     elif config.model_type == "qrf":
         return RandomForestQuantileRegressor(random_state=config.random_seed, n_jobs=-1)
+    elif config.model_type == "xgb":
+        return xgb.XGBRegressor(random_state=config.random_seed, n_jobs=-1, tree_method="hist")
+    elif config.model_type == "lgbm":
+        return lgb.LGBMRegressor(random_state=config.random_seed, n_jobs=-1, verbosity=-1)
     else:
         raise ValueError(f"Unknown model type: {config.model_type}")
-
+    
 # Function to train the model using the training data
 # determines best hyperparameters using non-spatial CV within training data 
 # uses random sampling of combination options rather than complete set of possible combinations 
