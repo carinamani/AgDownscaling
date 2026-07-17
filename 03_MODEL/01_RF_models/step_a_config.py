@@ -50,12 +50,13 @@ class RunConfig:
     dataset:             str
     fold_assignments:    str       
     model_type:          str
+    weighting:           str    
     id_cols:             list      = field(default_factory=list)
     n_inner_folds:       int       = 3
     n_iter_search:       int       = 25
     random_seed:         int       = 42
     quantiles:           list      = field(default_factory=lambda: [0.1, 0.5, 0.9])
-    param_distributions: dict      = None  # if not set manually, filled in below based on model_type
+    param_distributions: dict      = None
 
     def __post_init__(self):
         if self.param_distributions is None:

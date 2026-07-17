@@ -124,7 +124,4 @@ def evaluate(results, config):
     print("\n── Evaluation ───────────────────────────────")
     print(metrics_df.to_string(index=False))
 
-    print("\n── Per-country R2 ───────────────────────────")
-    print(country_metrics_all.to_string(index=False))
-
     return metrics_df, country_metrics_all
