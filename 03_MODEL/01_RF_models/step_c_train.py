@@ -71,10 +71,15 @@ def train_model(df, feature_cols, folds, config):
         best_model, best_params, cv_results = run_inner_search(model, X_train, y_train, config)
         print(f"  best params: {best_params}")
 
-        # predict on test data
+        # predict on test
         preds = predict(best_model, X_test, config)
         if isinstance(preds, pd.Series):
             preds = preds.to_frame()
+
+        # predict on train
+        train_preds = predict(best_model, X_train, config)
+        if isinstance(train_preds, pd.Series):
+            train_preds = train_preds.to_frame()
 
         # create df of actual and predicted values for each test region
         fold_df = df.loc[fold["test_idx"], config.id_cols + [config.target]].copy().reset_index(drop=True)
@@ -83,12 +88,16 @@ def train_model(df, feature_cols, folds, config):
         fold_df["fold"] = fold["fold"]
 
         fold_results.append({
-            "fold":        fold["fold"],
-            "predictions": fold_df,
-            "best_params": best_params,
-            "best_model":  best_model,
-            "cv_results":  cv_results,
-            "test_idx":    fold["test_idx"]
+            "fold":             fold["fold"],
+            "predictions":      fold_df,
+            "train_predictions": pd.concat([
+                df.loc[fold["train_idx"], config.id_cols + [config.target]].copy().reset_index(drop=True),
+                train_preds.reset_index(drop=True)
+            ], axis=1),
+            "best_params":      best_params,
+            "best_model":       best_model,
+            "cv_results":       cv_results,
+            "test_idx":         fold["test_idx"],
         })
 
     # stack predictions across all folds into 1 df

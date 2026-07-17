@@ -16,12 +16,12 @@ def get_impurity_importance(model, feature_cols):
 # Function to get permutation importance 
 # shuffle all of the values of each feature and see how model performance is impacted
 # the most its impacted, the higher the importance of that feature 
-def get_permutation_importance(model, X_test, y_test, config, n_repeats: int = 10):
+def get_permutation_importance(model, X_test, y_test, config, n_repeats: int = 10) -> pd.DataFrame:
     result = permutation_importance(
         model, X_test, y_test,
         n_repeats    = n_repeats,
         random_state = config.random_seed,
-        n_jobs       = -1,
+        n_jobs       = 1 if config.model_type == "qrf" else -1,
         scoring      = "neg_root_mean_squared_error",
     )
     return pd.DataFrame({
