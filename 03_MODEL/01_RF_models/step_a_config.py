@@ -11,18 +11,18 @@ from typing import Literal
 DEFAULT_PARAM_DISTRIBUTIONS = {
     "rf": {
         "n_estimators":     [200, 500, 1000],
-        "max_features":     ["sqrt", "log2", 0.3, 0.5],
-        "min_samples_leaf": [1, 2, 5, 10],
-        "max_depth":        [None, 10, 20, 30],
+        "max_features":     ["sqrt", "log2", 0.3, 0.5, 0.75],
+        "min_samples_leaf": [5, 10, 20, 50],
+        "max_depth":        [None],
     },
     "qrf": {
         "n_estimators":     [200, 500, 1000],
-        "max_features":     ["sqrt", "log2", 0.3, 0.5],
-        "min_samples_leaf": [1, 2, 5, 10],
-        "max_depth":        [None, 10, 20, 30],
+        "max_features":     ["sqrt", "log2", 0.3, 0.5, 0.75],
+        "min_samples_leaf": [5, 10, 20, 50],
+        "max_depth":        [None],
     },
     "xgb": {
-        "n_estimators":     [200, 500, 1000],
+        "n_estimators":     [500, 1000],
         "max_depth":        [3, 5, 7, 10],
         "learning_rate":    [0.01, 0.05, 0.1, 0.2],
         "subsample":        [0.6, 0.8, 1.0],
@@ -32,7 +32,7 @@ DEFAULT_PARAM_DISTRIBUTIONS = {
         "reg_lambda":       [1, 1.5, 2],
     },
     "lgbm": {
-        "n_estimators":      [200, 500, 1000],
+        "n_estimators":      [500, 1000],
         "num_leaves":        [15, 31, 63, 127],
         "learning_rate":     [0.01, 0.05, 0.1, 0.2],
         "subsample":         [0.6, 0.8, 1.0],
