@@ -126,9 +126,17 @@ def run_intensity_evaluation(results, config, country_intensity_path, intensity_
     )
     predictions = predictions.merge(subnational_actuals, on="PROJ_ID", how="left")
 
-    metrics = evaluate_intensity_r2(predictions, actual_col, pred_abs_log_col, pred_abs_col)
+    metrics_model = evaluate_intensity_r2(predictions, actual_col, pred_abs_log_col, pred_abs_col)
+
+    log_country_col = f"log_country_{_intensity_col_name(config.version, config.unit)}"
+    country_col = f"country_{_intensity_col_name(config.version, config.unit)}"
+
+    metrics_country_avg = evaluate_intensity_r2(predictions, actual_col, log_country_col, country_col)
 
     print("\n── Absolute intensity R² (reconstructed from predictions) ──────")
-    print(metrics.to_string(index=False))
+    print(metrics_model.to_string(index=False))
 
-    return metrics, predictions
+    print("\n── Absolute intensity R² (country average model) ──────")
+    print(metrics_country_avg.to_string(index=False))
+
+    return metrics_model, metrics_country_avg
