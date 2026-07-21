@@ -106,7 +106,7 @@ def evaluate_fold(fold_result, config):
     return metrics
 
 # Function to run metrics actoss all folds and print into table
-# includes row which aggregates results across all folds
+# includes rows which aggregate results across all folds (mean and variance)
 def evaluate(results, config):
     fold_metrics = [evaluate_fold(f, config) for f in results["fold_results"]]
 
@@ -117,9 +117,19 @@ def evaluate(results, config):
     )
 
     metrics_df = pd.DataFrame(fold_metrics)
-    overall    = metrics_df.drop(columns="fold").mean().to_dict()
-    overall["fold"] = "overall"
-    metrics_df = pd.concat([metrics_df, pd.DataFrame([overall])], ignore_index=True)
+
+    numeric_cols = metrics_df.drop(columns="fold")
+
+    overall = numeric_cols.mean().to_dict()
+    overall["fold"] = "overall_mean"
+
+    overall_var = numeric_cols.var().to_dict()
+    overall_var["fold"] = "overall_variance"
+
+    metrics_df = pd.concat(
+        [metrics_df, pd.DataFrame([overall, overall_var])],
+        ignore_index=True
+    )
 
     print("\n── Evaluation ───────────────────────────────")
     print(metrics_df.to_string(index=False))

@@ -30,9 +30,46 @@ def get_permutation_importance(model, X_test, y_test, config, n_repeats: int = 1
         "permutation_std":        result.importances_std,
     }).sort_values("permutation_importance", ascending=False)
 
+# Function to get, for each fold, the top-N features by a given importance column
+def get_top_n_by_fold(fold_importance_df, importance_col, n=5):
+    return (
+        fold_importance_df
+        .groupby("fold", group_keys=False)
+        .apply(lambda g: g.nlargest(n, importance_col))
+        .reset_index(drop=True)
+    )
+
+# Function to measure how stable the top-N feature set is across folds
+# "presence_rate" = fraction of folds in which a feature appears in that fold's top N
+def compute_top_n_stability(fold_importance_df, importance_col, n=5):
+    n_folds = fold_importance_df["fold"].nunique()
+
+    top_n_df = get_top_n_by_fold(fold_importance_df, importance_col, n=n)
+
+    # rank within each fold's top N (1 = most important that fold)
+    top_n_df["rank_in_fold"] = (
+        top_n_df.groupby("fold")[importance_col]
+        .rank(ascending=False, method="first")
+    )
+
+    stability = (
+        top_n_df.groupby("feature")
+        .agg(
+            times_in_top_n = ("fold", "count"),
+            mean_rank_when_in_top_n = ("rank_in_fold", "mean"),
+        )
+        .reset_index()
+    )
+    stability["presence_rate"] = stability["times_in_top_n"] / n_folds
+    stability = stability.sort_values(
+        ["presence_rate", "mean_rank_when_in_top_n"], ascending=[False, True]
+    ).reset_index(drop=True)
+
+    return stability, top_n_df
+
 # Function to run impurity and permutation importance for each fold
-# also gets aggregate stats across all folds
-def get_feature_importance(results, df, config):
+# also gets aggregate stats across all folds, and top-N stability
+def get_feature_importance(results, df, config, top_n=5):
     X = df[results["feature_cols"]]
     y = df[config.target]
 
@@ -82,4 +119,16 @@ def get_feature_importance(results, df, config):
     print("\n── Feature Importance (top 15) ──────────────────────────────")
     print(combined.head(15).to_string(index=False))
 
-    return combined
+    # top-N stability, based on permutation importance (more reliable than impurity for this purpose)
+    perm_stability, perm_top_n_by_fold = compute_top_n_stability(
+        permutation_df, "permutation_importance", n=top_n
+    )
+
+    print(f"\n── Top-{top_n} feature stability across folds (permutation importance) ──")
+    print(perm_stability.to_string(index=False))
+
+    return {
+        "combined":            combined,
+        "top_n_stability":     perm_stability,
+        "top_n_by_fold":       perm_top_n_by_fold,
+    }
