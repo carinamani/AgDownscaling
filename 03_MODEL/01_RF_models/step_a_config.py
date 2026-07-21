@@ -57,6 +57,9 @@ class RunConfig:
     random_seed:         int       = 42
     quantiles:           list      = field(default_factory=lambda: [0.1, 0.5, 0.9])
     param_distributions: dict      = None
+    version:             str  = None
+    unit:                str  = None
+    variable_def:        str  = None
 
     def __post_init__(self):
         if self.param_distributions is None:
