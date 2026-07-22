@@ -10,16 +10,16 @@ from typing import Literal
 # default hyperparameter search spaces, keyed by model type
 DEFAULT_PARAM_DISTRIBUTIONS = {
     "rf": {
-        "n_estimators":     [200, 500, 1000],
+        "n_estimators":     [200, 500, 1000, 2000],
         "max_features":     ["sqrt", "log2", 0.3, 0.5, 0.75],
         "min_samples_leaf": [5, 10, 20, 50],
-        "max_depth":        [None],
+        "max_depth":        [None, 10, 20],
     },
     "qrf": {
-        "n_estimators":     [200, 500, 1000],
+        "n_estimators":     [200, 500, 1000, 2000],
         "max_features":     ["sqrt", "log2", 0.3, 0.5, 0.75],
         "min_samples_leaf": [5, 10, 20, 50],
-        "max_depth":        [None],
+        "max_depth":        [None, 10, 20],
     },
     "xgb": {
         "n_estimators":     [500, 1000],
@@ -52,8 +52,8 @@ class RunConfig:
     model_type:          str
     weighting:           str    
     id_cols:             list      = field(default_factory=list)
-    n_inner_folds:       int       = 3
-    n_iter_search:       int       = 25
+    n_inner_folds:       int       = 5
+    n_iter_search:       int       = 100
     random_seed:         int       = 42
     quantiles:           list      = field(default_factory=lambda: [0.1, 0.5, 0.9])
     param_distributions: dict      = None
