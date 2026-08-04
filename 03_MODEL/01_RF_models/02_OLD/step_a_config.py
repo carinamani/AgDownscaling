@@ -10,10 +10,10 @@ from typing import Literal
 # default hyperparameter search spaces, keyed by model type
 DEFAULT_PARAM_DISTRIBUTIONS = {
     "rf": {
-        "n_estimators":     [200, 500, 1000, 2000],
-        "max_features":     ["sqrt", "log2", 0.3, 0.5, 0.75],
-        "min_samples_leaf": [5, 10, 20, 50],
-        "max_depth":        [None, 10, 20],
+        "n_estimators":     [1000],
+        "max_features":     ["sqrt", 0.75],
+        "min_samples_leaf": [5, 20],
+        "max_depth":        [None, 20],
     },
     "qrf": {
         "n_estimators":     [200, 500, 1000, 2000],
